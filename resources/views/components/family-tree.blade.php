@@ -26,9 +26,6 @@
                             <div class="text-xs text-gray-600 text-center">
                                 {{ $root->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                             </div>
-                            @if($root->birth_date)
-                                <div class="text-xs text-center">{{ \Carbon\Carbon::parse($root->birth_date)->format('d M Y') }}</div>
-                            @endif
                         </div>
 
                         <!-- Spouse (if any) -->
@@ -42,9 +39,6 @@
                                 <div class="text-xs text-gray-600 text-center">
                                     {{ $root->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                                 </div>
-                                @if($root->spouses->first()->birth_date)
-                                    <div class="text-xs text-center">{{ \Carbon\Carbon::parse($root->spouses->first()->birth_date)->format('d M Y') }}</div>
-                                @endif
                             </div>
                         @endif
                     </div>
@@ -103,9 +97,6 @@
                                             <div class="text-xs text-gray-600 text-center">
                                                 {{ $child->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                                             </div>
-                                            @if($child->birth_date)
-                                                <div class="text-xs text-center">{{ \Carbon\Carbon::parse($child->birth_date)->format('d M Y') }}</div>
-                                            @endif
                                         </div>
 
                                         <!-- Child's Spouse (if any) -->
@@ -119,9 +110,6 @@
                                                 <div class="text-xs text-gray-600 text-center">
                                                     {{ $child->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                                                 </div>
-                                                @if($child->spouses->first()->birth_date)
-                                                    <div class="text-xs text-center">{{ \Carbon\Carbon::parse($child->spouses->first()->birth_date)->format('d M Y') }}</div>
-                                                @endif
                                             </div>
                                         @endif
                                     </div>
@@ -252,39 +240,67 @@
             .then(data => {
                 // Isi konten modal dengan data anggota
                 document.getElementById('memberModalContent').innerHTML = `
-                    <div class="text-center mb-4">
-                        <img src="${data.photo ? data.photo : '/images/default-avatar.png'}"
-                             alt="${data.name}"
-                             class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
-                        <h3 class="text-xl font-bold">${data.name}</h3>
-                        <p class="text-gray-600">${data.gender === 'male' ? 'Laki-laki' : data.gender === 'female' ? 'Perempuan' : 'Lainnya'}</p>
+                    <div class="mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Informasi Dasar</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Nama Lengkap</p>
+                                    <p class="text-base">${data.name || '-'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Jenis Kelamin</p>
+                                    <p class="text-base">${data.gender === 'male' ? 'Laki-laki' : data.gender === 'female' ? 'Perempuan' : 'Lainnya'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Tanggal Lahir</p>
+                                    <p class="text-base">${data.birth_date ? new Date(data.birth_date).toLocaleDateString('id-ID') : '-'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Tempat Lahir</p>
+                                    <p class="text-base">${data.birth_place || '-'}</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Foto</p>
+                                    <div class="mt-1">
+                                        <img src="${data.photo ? data.photo : '/images/default-avatar.png'}"
+                                             alt="${data.name}"
+                                             class="w-24 h-24 rounded-lg object-cover border border-gray-200">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Pekerjaan</p>
+                                    <p class="text-base">${data.occupation || '-'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Tanggal Meninggal <span class="text-xs text-gray-500"></span></p>
+                                    <p class="text-base">${data.death_date ? new Date(data.death_date).toLocaleDateString('id-ID') : '-'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Tempat Meninggal <span class="text-xs text-gray-500"></span></p>
+                                    <p class="text-base">${data.death_place || '-'}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+
+
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Biografi</h2>
+
                         <div>
-                            <p class="text-sm font-medium text-gray-500">Tanggal Lahir</p>
-                            <p>${data.birth_date ? new Date(data.birth_date).toLocaleDateString('id-ID') : '-'}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Tempat Lahir</p>
-                            <p>${data.birth_place || '-'}</p>
-                        </div>
-                        ${data.death_date ? `
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Tanggal Meninggal</p>
-                            <p>${new Date(data.death_date).toLocaleDateString('id-ID')}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Tempat Meninggal</p>
-                            <p>${data.death_place || '-'}</p>
-                        </div>
-                        ` : ''}
-                        <div class="col-span-2">
-                            <p class="text-sm font-medium text-gray-500">Pekerjaan</p>
-                            <p>${data.occupation || '-'}</p>
-                        </div>
-                        <div class="col-span-2">
-                            <p class="text-sm font-medium text-gray-500">Biografi</p>
-                            <p>${data.bio || '-'}</p>
+                            <p class="text-sm font-medium text-gray-700">Cerita Hidup</p>
+                            <p class="text-base">${data.bio || '-'}</p>
                         </div>
                     </div>
                 `;
