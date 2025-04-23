@@ -15,6 +15,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-lg p-6 overflow-x-auto">
-        <x-family-tree :members="$members" :family="$family" />    </div>
+        <x-family-tree :members="$members" :family="$family" />
+    </div>
 </div>
 @endsection

@@ -1,54 +1,89 @@
 @props(['members', 'family'])
 
-<div class="family-tree p-4">
-    <div class="flex flex-col items-center">
-        @foreach($members->whereNull('parent_id') as $root)
-            <div class="spouse-container flex items-center">
-                <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->id }})">
-                    <img src="{{ $root->photo ? Storage::url($root->photo) : asset('images/default-avatar.png') }}"
-                         alt="{{ $root->name }}"
-                         class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
-                    <h3 class="text-lg font-semibold text-center">{{ $root->name }}</h3>
-                    <div class="text-xs text-gray-600 text-center">
-                        {{ $root->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
-                    </div>
-                    @if($root->birth_date)
-                        <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->birth_date)->format('d M Y') }}</div>
-                    @endif
-                </div>
+<div class="family-tree-container overflow-x-auto py-8">
+    <div class="family-tree">
+        <div class="flex flex-col items-center">
+            @foreach($members->whereNull('parent_id') as $root)
+                @php
+                    // Skip if this root member is someone's spouse to avoid duplication
+                    $isSpouse = false;
+                    foreach($members as $m) {
+                        if($m->spouses && $m->spouses->contains('id', $root->id)) {
+                            $isSpouse = true;
+                            break;
+                        }
+                    }
+                @endphp
 
-                @if($root->spouses && $root->spouses->count() > 0)
-                    <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
-                    <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->spouses->first()->id }})">
-                        <img src="{{ $root->spouses->first()->photo ? Storage::url($root->spouses->first()->photo) : asset('images/default-avatar.png') }}"
-                             alt="{{ $root->spouses->first()->name }}"
-                             class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
-                        <h3 class="text-lg font-semibold text-center">{{ $root->spouses->first()->name }}</h3>
-                        <div class="text-xs text-gray-600 text-center">
-                            {{ $root->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                @if(!$isSpouse)
+                    <div class="spouse-container flex items-center">
+                        <!-- Root member -->
+                        <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->id }})">
+                            <img src="{{ $root->photo ? Storage::url($root->photo) : asset('images/default-avatar.png') }}"
+                                alt="{{ $root->name }}"
+                                class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
+                            <h3 class="text-lg font-semibold text-center">{{ $root->name }}</h3>
+                            <div class="text-xs text-gray-600 text-center">
+                                {{ $root->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                            </div>
+                            @if($root->birth_date)
+                                <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->birth_date)->format('d M Y') }}</div>
+                            @endif
                         </div>
-                        @if($root->spouses->first()->birth_date)
-                            <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->spouses->first()->birth_date)->format('d M Y') }}</div>
+
+                        <!-- Spouse (if any) -->
+                        @if($root->spouses && $root->spouses->count() > 0)
+                            <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
+                            <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->spouses->first()->id }})">
+                                <img src="{{ $root->spouses->first()->photo ? Storage::url($root->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                    alt="{{ $root->spouses->first()->name }}"
+                                    class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
+                                <h3 class="text-lg font-semibold text-center">{{ $root->spouses->first()->name }}</h3>
+                                <div class="text-xs text-gray-600 text-center">
+                                    {{ $root->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                                </div>
+                                @if($root->spouses->first()->birth_date)
+                                    <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->spouses->first()->birth_date)->format('d M Y') }}</div>
+                                @endif
+                            </div>
                         @endif
                     </div>
-                @endif
-            </div>
 
-            @if($root->children->count() > 0 || ($root->spouses && $root->spouses->first() && $root->spouses->first()->children->where('parent_id', '!=', $root->id)->count() > 0))
-                <div class="vertical-line w-0.5 h-8 bg-gray-300"></div>
-                <div class="children-container flex justify-center space-x-4">
-                    @foreach($root->children as $child)
-                        @include('components.family-member', ['member' => $child])
-                    @endforeach
+                    <!-- Children section -->
+                    @php
+                        // Collect all children from both the root and spouse to avoid duplication
+                        $allChildren = collect([]);
 
-                    @if($root->spouses && $root->spouses->first())
-                        @foreach($root->spouses->first()->children->where('parent_id', '!=', $root->id) as $spouseChild)
-                            @include('components.family-member', ['member' => $spouseChild])
-                        @endforeach
+                        // Add root's children
+                        if($root->children->count() > 0) {
+                            $allChildren = $allChildren->merge($root->children);
+                        }
+
+                        // Add spouse's children that aren't already included
+                        if($root->spouses && $root->spouses->count() > 0) {
+                            $spouseChildren = $root->spouses->first()->children;
+                            foreach($spouseChildren as $spouseChild) {
+                                if(!$allChildren->contains('id', $spouseChild->id)) {
+                                    $allChildren->push($spouseChild);
+                                }
+                            }
+                        }
+
+                        // Sort children by birth date if available
+                        $allChildren = $allChildren->sortBy('birth_date');
+                    @endphp
+
+                    @if($allChildren->count() > 0)
+                        <div class="vertical-line w-0.5 h-8 bg-gray-300"></div>
+                        <div class="children-container flex flex-wrap justify-center">
+                            @foreach($allChildren as $child)
+                                @include('components.family-member', ['member' => $child])
+                            @endforeach
+                        </div>
                     @endif
-                </div>
-            @endif
-        @endforeach
+                @endif
+            @endforeach
+        </div>
     </div>
 </div>
 

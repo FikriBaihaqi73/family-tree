@@ -1,23 +1,40 @@
 @import "tailwindcss";
 @source "../views";
 
-
-.family-tree {
+/* Family Tree Layout Styles */
+.family-tree-container {
+    width: 100%;
     overflow-x: auto;
+    padding: 1rem;
+    min-height: 300px;
 }
 
+.family-tree {
+    min-width: fit-content;
+    margin: 0 auto;
+}
+
+/* Member Card Styles */
 .member-card {
     transition: all 0.3s ease;
-    min-width: 150px;
+    min-width: 160px;
+    max-width: 200px;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    position: relative;
 }
 
 .member-card:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Connection Lines */
 .vertical-line {
     margin: 0 auto;
+    height: 30px;
+    width: 2px;
+    background-color: #CBD5E0;
 }
 
 .children-container {
@@ -25,35 +42,74 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 30px;
+    padding-top: 20px;
+    min-width: 200px;
 }
 
 .children-container::before {
     content: '';
     position: absolute;
-    top: -8px;
-    left: 50%;
+    top: 0;
+    left: 10%;
     width: 80%;
     height: 2px;
     background-color: #CBD5E0;
-    transform: translateX(-50%);
 }
 
 .spouse-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 10px;
 }
 
 .spouse-connector {
     height: 2px;
     background-color: #CBD5E0;
-    min-width: 20px;
+    min-width: 30px;
 }
 
 .member-branch {
-    margin: 0 10px;
+    margin: 0 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 200px;
+}
+
+/* Modal Styles */
+#memberModal {
+    backdrop-filter: blur(2px);
+}
+
+#memberModalContent {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .family-tree {
+        padding: 1rem;
+    }
+
+    .member-branch {
+        min-width: 180px;
+    }
+
+    .member-card {
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 640px) {
+    .member-card {
+        min-width: 120px;
+        padding: 0.75rem;
+    }
+
+    .children-container {
+        gap: 15px;
+    }
 }

@@ -29,9 +29,22 @@ Route::middleware('auth')->group(function () {
     Route::resource('families', FamilyController::class);
 
     // Member routes
-    Route::resource('families.members', MemberController::class)->shallow();
+    // ...
+    // If you're using resource routes, make sure you have this:
+    Route::resource('families.members', MemberController::class);
+
+    // Or if you're defining routes individually, add these two routes:
+    Route::get('/families/{family}/members/{member}/edit', [MemberController::class, 'edit'])
+        ->name('families.members.edit');
+    Route::put('/families/{family}/members/{member}', [MemberController::class, 'update'])
+        ->name('families.members.update');
+
+    // Tambahan rute untuk modal edit dan delete
+    Route::post('/members/{member}/update', [MemberController::class, 'updateAjax']);
+    Route::delete('/members/{member}/delete', [MemberController::class, 'destroyAjax']);
 });
 
+// Rute untuk mendapatkan data anggota keluarga (dapat diakses tanpa login)
 Route::get('/members/{member}', function (App\Models\Member $member) {
     return response()->json([
         'id' => $member->id,
