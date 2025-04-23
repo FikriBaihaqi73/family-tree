@@ -96,7 +96,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="parent_id" class="block text-sm font-medium text-gray-700">Orang Tua</label>
+                <label for="parent_id" class="block text-sm font-medium text-gray-700">Orang Tua/Mertua</label>
                 <select name="parent_id" id="parent_id"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">Pilih Orang Tua</option>

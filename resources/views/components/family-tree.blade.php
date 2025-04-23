@@ -27,7 +27,7 @@
                                 {{ $root->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                             </div>
                             @if($root->birth_date)
-                                <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->birth_date)->format('d M Y') }}</div>
+                                <div class="text-xs text-center">{{ \Carbon\Carbon::parse($root->birth_date)->format('d M Y') }}</div>
                             @endif
                         </div>
 
@@ -43,7 +43,7 @@
                                     {{ $root->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
                                 </div>
                                 @if($root->spouses->first()->birth_date)
-                                    <div class="text-xs text-center">Lahir: {{ \Carbon\Carbon::parse($root->spouses->first()->birth_date)->format('d M Y') }}</div>
+                                    <div class="text-xs text-center">{{ \Carbon\Carbon::parse($root->spouses->first()->birth_date)->format('d M Y') }}</div>
                                 @endif
                             </div>
                         @endif
@@ -69,15 +69,137 @@
                             }
                         }
 
+                        // Filter out spouses who have their partners in the children list
+                        $filteredChildren = collect([]);
+                        foreach($allChildren as $child) {
+                            $isChildSpouse = false;
+                            foreach($allChildren as $potentialPartner) {
+                                if($potentialPartner->spouses && $potentialPartner->spouses->contains('id', $child->id)) {
+                                    $isChildSpouse = true;
+                                    break;
+                                }
+                            }
+                            if(!$isChildSpouse) {
+                                $filteredChildren->push($child);
+                            }
+                        }
+
                         // Sort children by birth date if available
-                        $allChildren = $allChildren->sortBy('birth_date');
+                        $filteredChildren = $filteredChildren->sortBy('birth_date');
                     @endphp
 
-                    @if($allChildren->count() > 0)
+                    @if($filteredChildren->count() > 0)
                         <div class="vertical-line w-0.5 h-8 bg-gray-300"></div>
                         <div class="children-container flex flex-wrap justify-center">
-                            @foreach($allChildren as $child)
-                                @include('components.family-member', ['member' => $child])
+                            @foreach($filteredChildren as $child)
+                                <div class="child-branch mx-4">
+                                    <div class="spouse-container flex items-center">
+                                        <!-- Child -->
+                                        <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $child->id }})">
+                                            <img src="{{ $child->photo ? Storage::url($child->photo) : asset('images/default-avatar.png') }}"
+                                                alt="{{ $child->name }}"
+                                                class="w-20 h-20 rounded-full mx-auto mb-2 object-cover">
+                                            <h3 class="text-md font-semibold text-center">{{ $child->name }}</h3>
+                                            <div class="text-xs text-gray-600 text-center">
+                                                {{ $child->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                                            </div>
+                                            @if($child->birth_date)
+                                                <div class="text-xs text-center">{{ \Carbon\Carbon::parse($child->birth_date)->format('d M Y') }}</div>
+                                            @endif
+                                        </div>
+
+                                        <!-- Child's Spouse (if any) -->
+                                        @if($child->spouses && $child->spouses->count() > 0)
+                                            <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
+                                            <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $child->spouses->first()->id }})">
+                                                <img src="{{ $child->spouses->first()->photo ? Storage::url($child->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                                    alt="{{ $child->spouses->first()->name }}"
+                                                    class="w-20 h-20 rounded-full mx-auto mb-2 object-cover">
+                                                <h3 class="text-md font-semibold text-center">{{ $child->spouses->first()->name }}</h3>
+                                                <div class="text-xs text-gray-600 text-center">
+                                                    {{ $child->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                                                </div>
+                                                @if($child->spouses->first()->birth_date)
+                                                    <div class="text-xs text-center">{{ \Carbon\Carbon::parse($child->spouses->first()->birth_date)->format('d M Y') }}</div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Grandchildren -->
+                                    @php
+                                        // Collect all grandchildren from both child and their spouse
+                                        $allGrandchildren = collect([]);
+
+                                        // Add child's children
+                                        if($child->children->count() > 0) {
+                                            $allGrandchildren = $allGrandchildren->merge($child->children);
+                                        }
+
+                                        // Add child's spouse's children
+                                        if($child->spouses && $child->spouses->count() > 0) {
+                                            $spouseChildren = $child->spouses->first()->children;
+                                            foreach($spouseChildren as $spouseChild) {
+                                                if(!$allGrandchildren->contains('id', $spouseChild->id)) {
+                                                    $allGrandchildren->push($spouseChild);
+                                                }
+                                            }
+                                        }
+
+                                        // Filter and sort grandchildren as we did with children
+                                        $filteredGrandchildren = collect([]);
+                                        foreach($allGrandchildren as $grandchild) {
+                                            $isGrandchildSpouse = false;
+                                            foreach($allGrandchildren as $potentialPartner) {
+                                                if($potentialPartner->spouses && $potentialPartner->spouses->contains('id', $grandchild->id)) {
+                                                    $isGrandchildSpouse = true;
+                                                    break;
+                                                }
+                                            }
+                                            if(!$isGrandchildSpouse) {
+                                                $filteredGrandchildren->push($grandchild);
+                                            }
+                                        }
+
+                                        $filteredGrandchildren = $filteredGrandchildren->sortBy('birth_date');
+                                    @endphp
+
+                                    @if($filteredGrandchildren->count() > 0)
+                                        <div class="vertical-line w-0.5 h-8 bg-gray-300 mx-auto"></div>
+                                        <div class="grandchildren-container flex flex-wrap justify-center">
+                                            @foreach($filteredGrandchildren as $grandchild)
+                                                <div class="grandchild-branch mx-2">
+                                                    <div class="spouse-container flex items-center">
+                                                        <!-- Grandchild -->
+                                                        <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $grandchild->id }})">
+                                                            <img src="{{ $grandchild->photo ? Storage::url($grandchild->photo) : asset('images/default-avatar.png') }}"
+                                                                alt="{{ $grandchild->name }}"
+                                                                class="w-16 h-16 rounded-full mx-auto mb-2 object-cover">
+                                                            <h3 class="text-sm font-semibold text-center">{{ $grandchild->name }}</h3>
+                                                            <div class="text-xs text-gray-600 text-center">
+                                                                {{ $grandchild->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Grandchild's Spouse (if any) -->
+                                                        @if($grandchild->spouses && $grandchild->spouses->count() > 0)
+                                                            <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
+                                                            <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $grandchild->spouses->first()->id }})">
+                                                                <img src="{{ $grandchild->spouses->first()->photo ? Storage::url($grandchild->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                                                    alt="{{ $grandchild->spouses->first()->name }}"
+                                                                    class="w-16 h-16 rounded-full mx-auto mb-2 object-cover">
+                                                                <h3 class="text-sm font-semibold text-center">{{ $grandchild->spouses->first()->name }}</h3>
+                                                                <div class="text-xs text-gray-600 text-center">
+                                                                    {{ $grandchild->spouses->first()->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
                             @endforeach
                         </div>
                     @endif
@@ -115,6 +237,7 @@
 
 <script>
     let currentMemberId = null;
+    let currentFamilyId = {{ isset($family) ? $family->id : 'null' }};
 
     function showMemberModal(memberId) {
         // Simpan ID anggota yang sedang ditampilkan
@@ -183,18 +306,18 @@
 
     // Event listener untuk tombol Edit
     document.getElementById('editMemberBtn').addEventListener('click', function() {
-        if (currentMemberId) {
-            window.location.href = `/families/{{ isset($family) ? $family->id : '' }}/members/${currentMemberId}/edit`;
+        if (currentMemberId && currentFamilyId) {
+            window.location.href = `/families/${currentFamilyId}/members/${currentMemberId}/edit`;
         }
     });
 
     // Event listener untuk tombol Hapus
     document.getElementById('deleteMemberBtn').addEventListener('click', function() {
-        if (currentMemberId && confirm('Apakah Anda yakin ingin menghapus anggota keluarga ini?')) {
+        if (currentMemberId && currentFamilyId && confirm('Apakah Anda yakin ingin menghapus anggota keluarga ini?')) {
             // Buat form untuk mengirim request DELETE
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/families/members/${currentMemberId}`;
+            form.action = `/families/${currentFamilyId}/members/${currentMemberId}`;
 
             // Tambahkan CSRF token
             const csrfToken = document.createElement('input');
