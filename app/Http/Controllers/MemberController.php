@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Family;
 use App\Models\Member;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class MemberController extends Controller

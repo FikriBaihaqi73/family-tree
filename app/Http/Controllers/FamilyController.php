@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Family;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class FamilyController extends Controller
@@ -13,7 +12,7 @@ class FamilyController extends Controller
     {
         $user = $request->user();
         $families = Family::where('user_id', $user->id)->get();
-        return view('families.index', compact('families'));
+        return view('dashboard', compact('families'));
     }
 
     public function create()
@@ -28,11 +27,11 @@ class FamilyController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $family = new Family($validated);
-        $family->user_id = $request->user()->id;
-        $family->save();
+        $families = new Family($validated);
+        $families->user_id = $request->user()->id;
+        $families->save();
 
-        return redirect()->route('families.show', $family)->with('success', 'Silsilah keluarga berhasil dibuat');
+        return redirect()->route('families.show', $families)->with('success', 'Silsilah keluarga berhasil dibuat');
     }
 
     public function show(Request $request, Family $family)
