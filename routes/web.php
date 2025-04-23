@@ -6,9 +6,9 @@ use App\Http\Controllers\MemberController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
-// Beranda
+// Beranda - mengubah rute ini untuk mengarah ke register
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('register');
 })->name('home');
 
 // Auth routes

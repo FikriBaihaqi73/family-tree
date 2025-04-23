@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Member extends Model
 {
@@ -27,6 +28,18 @@ class Member extends Model
         'birth_date' => 'date',
         'death_date' => 'date',
     ];
+
+    // Tambahkan event deleting untuk menghapus foto saat model dihapus
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($member) {
+            if ($member->photo) {
+                Storage::disk('public')->delete($member->photo);
+            }
+        });
+    }
 
     public function family()
     {
