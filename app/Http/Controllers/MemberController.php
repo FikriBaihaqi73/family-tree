@@ -6,9 +6,24 @@ use App\Models\Family;
 use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 
 class MemberController extends Controller
 {
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key' => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+        ]);
+    }
+
     public function create(Family $family)
     {
         $this->authorize('update', $family);
@@ -35,8 +50,12 @@ class MemberController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('members', 'public');
-            $validated['photo'] = $path;
+            $file = $request->file('photo');
+            $result = $this->cloudinary->uploadApi()->upload(
+                $file->getRealPath(),
+                ['folder' => 'silsilah/members']
+            );
+            $validated['photo'] = $result['secure_url'];
         }
 
         $member = new Member($validated);
@@ -83,11 +102,24 @@ class MemberController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            if ($member->photo) {
-                Storage::disk('public')->delete($member->photo);
+            // Jika ada foto lama dan URL-nya berisi cloudinary, hapus foto lama
+            if ($member->photo && strpos($member->photo, 'cloudinary.com') !== false) {
+                // Ekstrak public_id dari URL
+                $parts = explode('/', $member->photo);
+                $filename = end($parts);
+                $public_id = 'silsilah/members/' . pathinfo($filename, PATHINFO_FILENAME);
+
+                // Hapus gambar dari Cloudinary
+                $this->cloudinary->uploadApi()->destroy($public_id);
             }
-            $path = $request->file('photo')->store('members', 'public');
-            $validated['photo'] = $path;
+
+            // Upload foto baru
+            $file = $request->file('photo');
+            $result = $this->cloudinary->uploadApi()->upload(
+                $file->getRealPath(),
+                ['folder' => 'silsilah/members']
+            );
+            $validated['photo'] = $result['secure_url'];
         }
 
         $member->update($validated);
@@ -103,8 +135,15 @@ class MemberController extends Controller
     {
         $this->authorize('update', $family);
 
-        if ($member->photo) {
-            Storage::disk('public')->delete($member->photo);
+        // Hapus foto dari Cloudinary jika ada
+        if ($member->photo && strpos($member->photo, 'cloudinary.com') !== false) {
+            // Ekstrak public_id dari URL
+            $parts = explode('/', $member->photo);
+            $filename = end($parts);
+            $public_id = 'silsilah/members/' . pathinfo($filename, PATHINFO_FILENAME);
+
+            // Hapus gambar dari Cloudinary
+            $this->cloudinary->uploadApi()->destroy($public_id);
         }
 
         $member->delete();

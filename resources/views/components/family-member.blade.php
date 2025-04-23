@@ -4,8 +4,7 @@
     <div class="spouse-container flex items-center">
         <!-- Primary member card -->
         <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer hover:shadow-lg" onclick="showMemberModal({{ $member->id }})">
-            <img src="{{ $member->photo ? Storage::url($member->photo) : asset('images/default-avatar.png') }}"
-                 alt="{{ $member->name }}"
+            <img src="{{ $member->photo ?: "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}" alt="{{ $member->name }}"
                  class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-gray-200">
             <h4 class="text-md font-semibold text-center">{{ $member->name }}</h4>
             <div class="text-xs text-gray-600 text-center">
