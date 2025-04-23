@@ -19,7 +19,7 @@
                     <div class="spouse-container flex items-center">
                         <!-- Root member -->
                         <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->id }})">
-                            <img src="{{ $root->photo ? Storage::url($root->photo) : asset('images/default-avatar.png') }}"
+                            <img src="{{ $root->photo ? $root->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                 alt="{{ $root->name }}"
                                 class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
                             <h3 class="text-lg font-semibold text-center">{{ $root->name }}</h3>
@@ -32,7 +32,7 @@
                         @if($root->spouses && $root->spouses->count() > 0)
                             <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
                             <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $root->spouses->first()->id }})">
-                                <img src="{{ $root->spouses->first()->photo ? Storage::url($root->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                <img src="{{ $root->spouses->first()->photo ? $root->spouses->first()->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                     alt="{{ $root->spouses->first()->name }}"
                                     class="w-24 h-24 rounded-full mx-auto mb-2 object-cover">
                                 <h3 class="text-lg font-semibold text-center">{{ $root->spouses->first()->name }}</h3>
@@ -90,7 +90,7 @@
                                     <div class="spouse-container flex items-center">
                                         <!-- Child -->
                                         <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $child->id }})">
-                                            <img src="{{ $child->photo ? Storage::url($child->photo) : asset('images/default-avatar.png') }}"
+                                            <img src="{{ $child->photo ? $child->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                                 alt="{{ $child->name }}"
                                                 class="w-20 h-20 rounded-full mx-auto mb-2 object-cover">
                                             <h3 class="text-md font-semibold text-center">{{ $child->name }}</h3>
@@ -103,7 +103,7 @@
                                         @if($child->spouses && $child->spouses->count() > 0)
                                             <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
                                             <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $child->spouses->first()->id }})">
-                                                <img src="{{ $child->spouses->first()->photo ? Storage::url($child->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                                <img src="{{ $child->spouses->first()->photo ? $child->spouses->first()->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                                     alt="{{ $child->spouses->first()->name }}"
                                                     class="w-20 h-20 rounded-full mx-auto mb-2 object-cover">
                                                 <h3 class="text-md font-semibold text-center">{{ $child->spouses->first()->name }}</h3>
@@ -160,7 +160,7 @@
                                                     <div class="spouse-container flex items-center">
                                                         <!-- Grandchild -->
                                                         <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $grandchild->id }})">
-                                                            <img src="{{ $grandchild->photo ? Storage::url($grandchild->photo) : asset('images/default-avatar.png') }}"
+                                                            <img src="{{ $grandchild->photo ? $grandchild->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                                                 alt="{{ $grandchild->name }}"
                                                                 class="w-16 h-16 rounded-full mx-auto mb-2 object-cover">
                                                             <h3 class="text-sm font-semibold text-center">{{ $grandchild->name }}</h3>
@@ -173,7 +173,7 @@
                                                         @if($grandchild->spouses && $grandchild->spouses->count() > 0)
                                                             <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
                                                             <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer" onclick="showMemberModal({{ $grandchild->spouses->first()->id }})">
-                                                                <img src="{{ $grandchild->spouses->first()->photo ? Storage::url($grandchild->spouses->first()->photo) : asset('images/default-avatar.png') }}"
+                                                                <img src="{{ $grandchild->spouses->first()->photo ? $grandchild->spouses->first()->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png" }}"
                                                                     alt="{{ $grandchild->spouses->first()->name }}"
                                                                     class="w-16 h-16 rounded-full mx-auto mb-2 object-cover">
                                                                 <h3 class="text-sm font-semibold text-center">{{ $grandchild->spouses->first()->name }}</h3>
@@ -270,7 +270,7 @@
                                 <div>
                                     <p class="text-sm font-medium text-gray-700">Foto</p>
                                     <div class="mt-1">
-                                        <img src="${data.photo ? data.photo : '/images/default-avatar.png'}"
+                                        <img src="${data.photo ? data.photo : 'https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png'}"
                                              alt="${data.name}"
                                              class="w-24 h-24 rounded-lg object-cover border border-gray-200">
                                     </div>

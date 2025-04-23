@@ -26,7 +26,7 @@
         @if($spouse)
             <div class="spouse-connector w-8 h-0.5 bg-gray-300 mx-2"></div>
             <div class="member-card bg-white rounded-lg shadow-md p-4 mb-4 cursor-pointer hover:shadow-lg" onclick="showMemberModal({{ $spouse->id }})">
-                <img src="{{ $spouse->photo ? Storage::url($spouse->photo) : asset('images/default-avatar.png') }}"
+                <img src="{{ $spouse->photo ? $spouse->photo : "https://res.cloudinary.com/dhct2oudf/image/upload/v1745413780/default-avatar_m0w4f4.png"
                      alt="{{ $spouse->name }}"
                      class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-gray-200">
                 <h4 class="text-md font-semibold text-center">{{ $spouse->name }}</h4>
